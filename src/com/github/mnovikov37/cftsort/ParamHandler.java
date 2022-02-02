@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ParamHandler {
-    private final static char MINUS = '-';
+    private final static char PARAMETER_FLAG = '-';
     private final static String SORT_TYPE_ASC = "-a";
     private final static String SORT_TYPE_DESC = "-d";
     private final static String DATA_TYPE_INT = "-i";
@@ -15,10 +15,19 @@ public class ParamHandler {
     private String outputFileName;
     private List<String> inputFileNames;
     private List<String> warningMessages;
+    private List<String> criticalErrorMessages;
+
+    public List<String> getWarningMessages() {
+        return warningMessages;
+    }
+
+    public List<String> getCriticalErrorMessages() {
+        return criticalErrorMessages;
+    }
 
     private boolean isOption(String parameter) {
         boolean result = false;
-        if (parameter.length() > 0 && parameter.charAt(0) == MINUS) {
+        if (parameter.length() > 0 && parameter.charAt(0) == PARAMETER_FLAG) {
             result = true;
         }
         return result;
@@ -33,6 +42,7 @@ public class ParamHandler {
     public ParamHandler(String[] args) {
         inputFileNames = new ArrayList<>();
         warningMessages = new ArrayList<>();
+        criticalErrorMessages = new ArrayList<>();
         for (String arg : args) {
             StringBuilder errorMessageBuilder = new StringBuilder();
             if (isOption(arg)) {
@@ -74,16 +84,27 @@ public class ParamHandler {
                     inputFileNames.add(arg);
                 } else {
                     errorMessageBuilder.append(ErrorMessage.INPUT_FILE_NAME_EQUALS_OUTPUT_FILE_NAME.getMessage())
-                                    .append(" - such files will be removed from the list of input files");
+                                    .append(" - such files have been removed from the list of input files");
                 }
             }
             if (errorMessageBuilder.length() > 0) {
                 addToMessages(warningMessages, errorMessageBuilder.toString());
             }
         }
-        for (String message: warningMessages) {
-            System.out.println(message);
+
+        if (sortType == null) {
+            sortType = SortType.ASC;
         }
+        if (dataType == null) {
+            addToMessages(criticalErrorMessages, ErrorMessage.DATA_TYPE_NOT_SPECIFIED.getMessage());
+        }
+        if (outputFileName == null) {
+            addToMessages(criticalErrorMessages, ErrorMessage.OUTPUT_FILE_NOT_SPECIFIED.getMessage());
+        }
+        if (inputFileNames.isEmpty()) {
+            addToMessages(criticalErrorMessages, ErrorMessage.INPUT_FILES_NOT_SPECIFIED.getMessage());
+        }
+
         System.out.println("sortType = " + sortType);
         System.out.println("dataType = " + dataType);
         System.out.println("outputFileName = " + outputFileName);
