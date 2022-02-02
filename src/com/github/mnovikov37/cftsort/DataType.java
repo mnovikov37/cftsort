@@ -19,5 +19,7 @@ public enum DataType {
         return result;
     }
 
-    DataType(String command) { this.command = command; }
+    DataType(String command) {
+        this.command = command;
+    }
 }
