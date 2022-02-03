@@ -4,8 +4,6 @@ import java.io.*;
 
 public class FileHandler {
     private String fileName;
-    private DataType dataType;
-    private SortType sortType;
     private BufferedReader reader;
     private long lineNumber;
 
@@ -78,12 +76,10 @@ public class FileHandler {
         }
     }
 
-    public FileHandler(String fileName, DataType dataType, SortType sortType) throws FileNotFoundException {
+    public FileHandler(String fileName) throws FileNotFoundException {
         this.fileName = fileName;
         FileReader fr = new FileReader(fileName);
         reader = new BufferedReader(fr);
-        this.dataType = dataType;
-        this.sortType = sortType;
         this.lineNumber = 0;
     }
 }

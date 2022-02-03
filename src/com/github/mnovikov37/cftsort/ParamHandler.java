@@ -17,10 +17,13 @@ public class ParamHandler {
     private List<String> warningMessages;
     private List<String> criticalErrorMessages;
 
+    public SortType getSortType() { return sortType; }
+    public DataType getDataType() { return dataType; }
+    public String getOutputFileName() { return outputFileName; }
+    public List<String> getInputFileNames() { return inputFileNames; }
     public List<String> getWarningMessages() {
         return warningMessages;
     }
-
     public List<String> getCriticalErrorMessages() {
         return criticalErrorMessages;
     }
@@ -104,10 +107,5 @@ public class ParamHandler {
         if (inputFileNames.isEmpty()) {
             addToMessages(criticalErrorMessages, ErrorMessage.INPUT_FILES_NOT_SPECIFIED.getMessage());
         }
-
-        System.out.println("sortType = " + sortType);
-        System.out.println("dataType = " + dataType);
-        System.out.println("outputFileName = " + outputFileName);
-        System.out.println("inputFileName = " + inputFileNames);
     }
 }
