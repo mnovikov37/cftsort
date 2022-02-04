@@ -7,6 +7,9 @@ public class FileHandler {
     private BufferedReader reader;
     private long lineNumber;
 
+    public long getLineNumber() { return lineNumber; }
+    public String getFileName() { return fileName; }
+
     private boolean containsSpace(String s) {
         boolean result = false;
         for (int i = 0; !result && i < s.length(); i++) {

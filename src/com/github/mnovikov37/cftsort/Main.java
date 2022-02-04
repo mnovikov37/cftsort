@@ -22,7 +22,7 @@ public class Main {
         if (paramHandler.getCriticalErrorMessages().isEmpty()) {
             Sorter sorter = new Sorter(paramHandler);
             if (sorter.getCriticalErrorMessages().isEmpty()) {
-                System.out.println("Sort is begin");
+                sorter.sort();
             } else {
                 printMessages(ErrorLevel.CRITICAL, sorter.getCriticalErrorMessages());
             }

@@ -1,10 +1,13 @@
 package com.github.mnovikov37.cftsort;
 
 public enum SortType {
-    ASC("-a"),
-    DESC("-d");
+    ASC("-a", 1),
+    DESC("-d", -1);
 
     private String command;
+    private int multiplier;
+
+    public int getMultiplier() { return multiplier; }
 
     public static SortType forCommand(String command) {
         SortType result = null;
@@ -19,7 +22,8 @@ public enum SortType {
         return result;
     }
 
-    SortType(String command) {
+    SortType(String command, int multiplier) {
         this.command = command;
+        this.multiplier = multiplier;
     }
 }
