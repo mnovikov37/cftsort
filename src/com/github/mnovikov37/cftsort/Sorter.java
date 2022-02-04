@@ -13,38 +13,25 @@ public class Sorter {
 
     public List<String> getCriticalErrorMessages() { return criticalErrorMessages; }
 
-    public void sort() {
-        if (dataType == DataType.INT) {
-            intSort();
-        }
-        try {
-            outputWriter.close();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    private int compareInt(Integer num1, Integer num2) {
+    private <T> int compare(T t1, T t2) {
         int result = 0;
 
-        if (num1 > num2) {
-            result = 1;
-        }
-        if (num1 < num2) {
-            result = -1;
+        switch (dataType) {
+            case INT -> result = ((Integer)t1).compareTo((Integer)t2);
+            case STRING -> result = ((String)t1).compareTo((String)t2);
         }
         result *= sortType.getMultiplier();
 
         return result;
     }
 
-    private int calcNextIndex(Integer[] input) {
+    private <T> int calcNextIndex(T[] input) {
         int result = -1;
         int count = input.length;
 
-        Integer limit = sortType == SortType.ASC ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+        T limit = null;
         for (int i = 0; i < count; i++) {
-            if (input[i] != null && compareInt(input[i], limit) < 0) {
+            if (input[i] != null && (limit == null || compare(input[i], limit) <= 0)) {
                 limit = input[i];
                 result = i;
             }
@@ -53,43 +40,77 @@ public class Sorter {
         return result;
     }
 
-    private void shift(Integer[] prev, Integer[] cur, int index) {
+    private <T> void shift(T[] prev, T[] cur, int index) {
         prev[index] = cur[index];
-        cur[index] = files.get(index).getNextInt();
-        if (cur[index] != null && compareInt(cur[index], prev[index]) < 0) {
+        switch (dataType) {
+            case INT -> cur[index] = (T) files.get(index).getNextInt();
+            case STRING -> cur[index] = (T) files.get(index).getNextString();
+        }
+        if (cur[index] != null && compare(cur[index], prev[index]) < 0) {
             cur[index] = null;
             StringBuilder sb = new StringBuilder();
             sb.append("\"").append(files.get(index).getFileName()).append("\" line ")
                     .append(files.get(index).getLineNumber())
-                    .append(" - invalid order of data in file. The file is excluded  from further sorting");
+                    .append(" - invalid order of data in file. The file is excluded from the further sorting");
             System.out.println(sb);
         }
     }
 
-    private void intSort() {
-        int inputFilesCount = files.size();
-        Integer[] currentValue = new Integer[inputFilesCount];
-        Integer[] previousValue = new Integer[inputFilesCount];
-        for (int i = 0; i < inputFilesCount; i++) {
-            previousValue[i] = Integer.MIN_VALUE;
-            currentValue[i] = files.get(i).getNextInt();
+    private <T> boolean writeLineToOutputFile(T data) {
+        boolean result = true;
+        try {
+            outputWriter.write(data.toString() + "\n");
+        } catch (IOException e) {
+            System.out.println("Critical error: cannot write next line into output file\n"
+                    + e.getMessage() + "\nProgram will be closed");
+            result = false;
         }
+        return result;
+    }
+
+    private void closeWriter() {
+        try {
+            outputWriter.close();
+        } catch (IOException e) {
+            System.out.println("Critical error: cannot save output file\n" + e.getMessage()
+                    + "\nOutput data may be saved not correctly");
+        }
+    }
+
+    private <T> void sort() {
+        int inputFilesCount = files.size();
+        T[] current = null;
+        T[] previous = null;
+        switch (dataType) {
+            case INT -> {
+                current = (T[]) new Integer[inputFilesCount];
+                previous = (T[]) new Integer[inputFilesCount];
+                for (int i = 0; i < inputFilesCount; i++) {
+                    previous[i] = (T) files.get(i).getNextInt();
+                    current[i] = previous[i];
+                }
+            }
+            case STRING -> {
+                current = (T[]) new String[inputFilesCount];
+                previous = (T[]) new String[inputFilesCount];
+                for (int i = 0; i < inputFilesCount; i++) {
+                    previous[i] = (T) files.get(i).getNextString();
+                    current[i] = previous[i];
+                }
+            }
+        }
+
         int nextIndex = 0;
         while (nextIndex >= 0) {
-            nextIndex = calcNextIndex(currentValue);
-//            System.out.println("NI = " + nextIndex);
+            nextIndex = calcNextIndex(current);
             if (nextIndex >= 0) {
-//                System.out.println("VAL = " + currentValue[nextIndex]);
-                shift(previousValue, currentValue, nextIndex);
-                try {
-                    outputWriter.write(previousValue[nextIndex].toString() + "\n");
-                } catch (IOException e) {
-                    System.out.println("Critical error: cannot write next line into output file\n"
-                            + e.getMessage() + "\nProgram will be closed");
+                shift(previous, current, nextIndex);
+                if (!writeLineToOutputFile(previous[nextIndex])) {
                     nextIndex = -1;
                 }
             }
         }
+        closeWriter();
     }
 
     public Sorter(ParamHandler paramHandler) {
@@ -116,6 +137,7 @@ public class Sorter {
             if (outputWriter != null) {
                 sortType = paramHandler.getSortType();
                 dataType = paramHandler.getDataType();
+                sort();
             }
         }
     }
