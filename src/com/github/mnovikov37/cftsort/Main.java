@@ -21,9 +21,7 @@ public class Main {
         }
         if (paramHandler.getCriticalErrorMessages().isEmpty()) {
             Sorter sorter = new Sorter(paramHandler);
-            if (sorter.getCriticalErrorMessages().isEmpty()) {
-                sorter.sort();
-            } else {
+            if (!sorter.getCriticalErrorMessages().isEmpty()) {
                 printMessages(ErrorLevel.CRITICAL, sorter.getCriticalErrorMessages());
             }
         } else {
