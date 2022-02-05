@@ -1,5 +1,8 @@
 package com.github.mnovikov37.cftsort;
 
+/**
+ * Сообщения об ошибках, используемые в программе.
+ */
 public enum ErrorMessage {
 
     DUPLICATE_SORT_TYPE_PARAM("More then one params of sort type"),
@@ -13,6 +16,9 @@ public enum ErrorMessage {
     NO_INPUT_FILE_FOUND("No input file found"),
     INPUT_FILES_NOT_SPECIFIED("Input files not specified");
 
+    /**
+     * Сообщение, соответствующее той или иной ошибке.
+     */
     private String message;
 
     public String getMessage() {
